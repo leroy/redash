@@ -1,0 +1,19 @@
+# Binaries
+/redash
+/bin/
+/dist/
+
+# Test & coverage
+*.out
+*.test
+coverage.txt
+
+# Editors / OS
+.DS_Store
+.idea/
+.vscode/
+
+# Local config (contains API keys)
+config.local.yaml
+.env
+.env.local
