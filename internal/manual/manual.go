@@ -35,6 +35,8 @@ func Topics() []Topic {
 		cmdQueries(),
 		cmdDatasources(),
 		cmdDashboards(),
+		cmdVisualizations(),
+		cmdWidgets(),
 		cmdUsers(),
 		cmdConfig(),
 		cmdVersion(),
@@ -447,6 +449,44 @@ Partial update. Only fields explicitly passed on the command line are sent:
 - ` + "`--tag T`" + ` (repeatable; replaces the existing tag set)
 - SQL: positional arg after ID, or ` + "`--file`" + `
 - ` + "`--publish`" + ` / ` + "`--unpublish`" + ` (mutually exclusive)
+- ` + "`--parameters JSON|FILE|-`" + ` — replace the parameter list (see below)
+
+#### Updating parameters
+
+Redash stores query parameters as an array under ` + "`options.parameters`" + `.
+` + "`--parameters`" + ` accepts **inline JSON**, a **file path**, or ` + "`-`" + ` for stdin.
+The CLI fetches the current options, splices in the new parameter array,
+and writes them back — other fields under ` + "`options`" + ` are preserved.
+
+Parameter object shape (one per parameter):
+
+` + "```json" + `
+{
+  "name": "country",
+  "title": "Country",
+  "type": "text",
+  "value": "US",
+  "global": false
+}
+` + "```" + `
+
+Inline example:
+
+` + "```" + `
+redash queries update 42 --parameters '[{"name":"country","title":"Country","type":"text","value":"US","global":false}]'
+` + "```" + `
+
+From a file or stdin:
+
+` + "```" + `
+redash queries update 42 --parameters ./params.json
+jq -n '[{name:"limit",title:"Limit",type:"number",value:100,global:false}]' \
+  | redash queries update 42 --parameters -
+` + "```" + `
+
+Parameter ` + "`type`" + ` values: ` + "`text`" + `, ` + "`number`" + `, ` + "`enum`" + `, ` + "`query`" + `, ` + "`date`" + `,
+` + "`datetime-local`" + `, ` + "`datetime-with-seconds`" + `, ` + "`date-range`" + `,
+` + "`datetime-range`" + `, ` + "`datetime-range-with-seconds`" + `.
 
 ### ` + "`redash queries archive ID --yes`" + `
 
@@ -483,8 +523,11 @@ empty).
 
 func cmdDashboards() Topic {
 	return Topic{
-		Name: "dashboards", Command: "dashboards", Title: "`redash dashboards` — inspect dashboards",
+		Name: "dashboards", Command: "dashboards", Title: "`redash dashboards` — manage dashboards",
 		Body: `Alias: ` + "`redash dashboard`" + `.
+
+Widgets on a dashboard are managed separately via ` + "`redash widgets`" + `
+(see ` + "`--topic widgets`" + `).
 
 ### ` + "`redash dashboards list`" + `
 
@@ -495,7 +538,129 @@ Columns: ` + "`id, slug, name, tags, user, updated_at`" + `.
 
 Get a single dashboard by slug. Newer Redash releases also accept numeric IDs
 at the same endpoint. In ` + "`--format json`" + ` the full raw payload (including
-widgets) is returned.`,
+widgets) is returned.
+
+### ` + "`redash dashboards create --name NAME`" + `
+
+Create a new, empty, **draft** dashboard. The response includes the
+assigned ` + "`id`" + ` and ` + "`slug`" + ` — you'll need the ID to attach widgets.
+
+### ` + "`redash dashboards update ID`" + `
+
+Partial update of dashboard metadata. Only passed flags are sent.
+
+- ` + "`--name NAME`" + ` — rename
+- ` + "`--tag T`" + ` (repeatable) — replace the tag set
+- ` + "`--publish`" + ` / ` + "`--unpublish`" + ` — toggle ` + "`is_draft`" + ` (mutually exclusive)
+- ` + "`--enable-filters`" + ` / ` + "`--disable-filters`" + ` — dashboard-level filters
+
+### ` + "`redash dashboards archive ID --yes`" + `
+
+Soft-delete a dashboard. ` + "`--yes`" + ` is required.`,
+	}
+}
+
+func cmdVisualizations() Topic {
+	return Topic{
+		Name: "visualizations", Command: "visualizations", Title: "`redash visualizations` — manage query visualizations",
+		Body: `Aliases: ` + "`redash viz`" + `, ` + "`redash visualization`" + `.
+
+Every saved query gets an implicit TABLE visualization automatically;
+this subcommand tree is for additional visualizations (charts, counters,
+pivots, maps, ...).
+
+### ` + "`redash visualizations create`" + `
+
+` + "```" + `
+redash visualizations create \
+  --query 42 \
+  --type CHART \
+  --name "Orders over time" \
+  --description "Line chart of daily orders" \
+  --options ./chart-options.json
+` + "```" + `
+
+Required: ` + "`--query`" + `, ` + "`--type`" + `, ` + "`--name`" + `.
+
+Common ` + "`--type`" + ` values: ` + "`TABLE`" + `, ` + "`CHART`" + `, ` + "`COUNTER`" + `, ` + "`PIVOT_TABLE`" + `,
+` + "`MAP`" + `, ` + "`WORD_CLOUD`" + `, ` + "`SUNBURST_SEQUENCE`" + `, ` + "`SANKEY`" + `, ` + "`BOXPLOT`" + `,
+` + "`CHOROPLETH`" + `, ` + "`DETAILS`" + `.
+
+` + "`--options`" + ` is the type-specific options JSON (inline, file path, or ` + "`-`" + `
+for stdin). The shape is complex and differs per type; to discover a
+valid shape, create one via the Redash UI then fetch it with:
+
+` + "```" + `
+redash queries get 42 --format json | jq '.visualizations'
+` + "```" + `
+
+### ` + "`redash visualizations update ID`" + `
+
+Partial update: ` + "`--type`" + `, ` + "`--name`" + `, ` + "`--description`" + `, ` + "`--options`" + `.
+At least one must be passed.
+
+### ` + "`redash visualizations delete ID --yes`" + `
+
+Deletes a visualization. The implicit TABLE visualization on a query
+cannot be deleted (Redash rejects the request). ` + "`--yes`" + ` is required.`,
+	}
+}
+
+func cmdWidgets() Topic {
+	return Topic{
+		Name: "widgets", Command: "widgets", Title: "`redash widgets` — manage dashboard widgets",
+		Body: `Alias: ` + "`redash widget`" + `.
+
+A widget is either a **visualization** pinned to a dashboard, or a
+**text** (markdown) widget. Create a dashboard first with
+` + "`redash dashboards create`" + `, then attach widgets.
+
+### ` + "`redash widgets add`" + `
+
+Exactly one of ` + "`--visualization`" + ` / ` + "`--text`" + ` must be set.
+
+` + "```" + `
+# Pin a visualization at grid (col=0, row=0, width=3 cols, height=8 rows)
+redash widgets add --dashboard 7 --visualization 99 \
+  --col 0 --row 0 --size-x 3 --size-y 8
+
+# Add a markdown text widget
+redash widgets add --dashboard 7 --text "## Revenue\nSee chart below." \
+  --col 0 --row 8 --size-x 6 --size-y 2
+` + "```" + `
+
+Flags:
+
+- ` + "`--dashboard ID`" + ` (required) — dashboard to add to
+- ` + "`--visualization ID`" + ` — visualization to pin
+- ` + "`--text MARKDOWN`" + ` — markdown for a text widget
+- ` + "`--col N`" + ` / ` + "`--row N`" + ` (default 0) — grid position, 0-indexed
+- ` + "`--size-x N`" + ` (default 3) — grid width in columns
+- ` + "`--size-y N`" + ` (default 8) — grid height in rows
+- ` + "`--width N`" + ` (default 1) — legacy width field
+- ` + "`--options JSON|FILE|-`" + ` — full options JSON (overrides --col/--row/--size-*)
+
+### ` + "`redash widgets update ID`" + `
+
+Partial update:
+
+- ` + "`--text MARKDOWN`" + ` (text widgets only)
+- ` + "`--width N`" + ` (legacy width)
+- ` + "`--options JSON|FILE|-`" + ` — full options replacement (usually to reposition)
+
+To move a widget without rewriting its whole options block, fetch the
+current options, edit ` + "`options.position`" + `, and pass the result back:
+
+` + "```" + `
+redash dashboards get my-dashboard --format json \
+  | jq '.widgets[] | select(.id==123) | .options' \
+  | jq '.position.col = 3' \
+  | redash widgets update 123 --options -
+` + "```" + `
+
+### ` + "`redash widgets remove ID --yes`" + `
+
+Aliases: ` + "`rm`" + `, ` + "`delete`" + `. ` + "`--yes`" + ` is required.`,
 	}
 }
 

@@ -58,6 +58,8 @@ func init() {
 	Root.AddCommand(newQueriesCmd())
 	Root.AddCommand(newDataSourcesCmd())
 	Root.AddCommand(newDashboardsCmd())
+	Root.AddCommand(newVisualizationsCmd())
+	Root.AddCommand(newWidgetsCmd())
 	Root.AddCommand(newUsersCmd())
 	Root.AddCommand(newConfigCmd())
 	Root.AddCommand(newManualCmd())

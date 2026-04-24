@@ -140,6 +140,44 @@ func (c *Client) ArchiveQuery(ctx context.Context, id int) error {
 	return c.Do(ctx, "DELETE", fmt.Sprintf("/api/queries/%d", id), nil, nil, nil)
 }
 
+// UpdateQueryParameters replaces the parameter list inside the query's
+// options while preserving all other options fields. Redash's update
+// endpoint does a full-replace of `options`, so we fetch the current
+// options first, splice in the new parameters, and PATCH it back.
+//
+// params should be a JSON array of Redash parameter definitions, e.g.
+//
+//	[{"name":"country","title":"Country","type":"text","value":"US","global":false}]
+func (c *Client) UpdateQueryParameters(ctx context.Context, id int, params json.RawMessage) (*Query, error) {
+	q, err := c.GetQuery(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+
+	opts := map[string]any{}
+	if len(q.Options) > 0 {
+		if err := json.Unmarshal(q.Options, &opts); err != nil {
+			return nil, fmt.Errorf("parse existing options: %w", err)
+		}
+	}
+
+	var decoded any
+	if err := json.Unmarshal(params, &decoded); err != nil {
+		return nil, fmt.Errorf("parse parameters JSON: %w", err)
+	}
+	arr, ok := decoded.([]any)
+	if !ok {
+		return nil, fmt.Errorf("parameters must be a JSON array, got %T", decoded)
+	}
+	opts["parameters"] = arr
+
+	newOpts, err := json.Marshal(opts)
+	if err != nil {
+		return nil, fmt.Errorf("marshal options: %w", err)
+	}
+	return c.UpdateQuery(ctx, id, UpdateQueryInput{Options: newOpts})
+}
+
 // --- Execution ---------------------------------------------------------
 
 // Job represents an async execution job. Status: 1 pending, 2 started,

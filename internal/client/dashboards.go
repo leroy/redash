@@ -72,3 +72,51 @@ func (c *Client) GetDashboard(ctx context.Context, slug string) (*Dashboard, err
 	out.Raw = raw
 	return &out, nil
 }
+
+// CreateDashboardInput is the payload for CreateDashboard.
+type CreateDashboardInput struct {
+	Name string `json:"name"`
+}
+
+// CreateDashboard creates a new (empty, draft) dashboard.
+func (c *Client) CreateDashboard(ctx context.Context, in CreateDashboardInput) (*Dashboard, error) {
+	var raw json.RawMessage
+	if err := c.Do(ctx, "POST", "/api/dashboards", nil, in, &raw); err != nil {
+		return nil, err
+	}
+	var out Dashboard
+	if err := json.Unmarshal(raw, &out); err != nil {
+		return nil, fmt.Errorf("decode dashboard: %w", err)
+	}
+	out.Raw = raw
+	return &out, nil
+}
+
+// UpdateDashboardInput is a partial update. Only non-nil / non-empty
+// fields are sent.
+type UpdateDashboardInput struct {
+	Name                    *string   `json:"name,omitempty"`
+	Tags                    *[]string `json:"tags,omitempty"`
+	IsDraft                 *bool     `json:"is_draft,omitempty"`
+	DashboardFiltersEnabled *bool     `json:"dashboard_filters_enabled,omitempty"`
+}
+
+// UpdateDashboard updates a dashboard's metadata (name, tags, draft state,
+// filters). Widgets are managed via the widgets endpoints.
+func (c *Client) UpdateDashboard(ctx context.Context, id int, in UpdateDashboardInput) (*Dashboard, error) {
+	var raw json.RawMessage
+	if err := c.Do(ctx, "POST", fmt.Sprintf("/api/dashboards/%d", id), nil, in, &raw); err != nil {
+		return nil, err
+	}
+	var out Dashboard
+	if err := json.Unmarshal(raw, &out); err != nil {
+		return nil, fmt.Errorf("decode dashboard: %w", err)
+	}
+	out.Raw = raw
+	return &out, nil
+}
+
+// ArchiveDashboard soft-deletes a dashboard.
+func (c *Client) ArchiveDashboard(ctx context.Context, id int) error {
+	return c.Do(ctx, "DELETE", fmt.Sprintf("/api/dashboards/%d", id), nil, nil, nil)
+}
