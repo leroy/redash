@@ -94,9 +94,9 @@ func (in AddWidgetInput) MarshalJSON() ([]byte, error) {
 		m["text"] = in.Text
 	}
 	if len(in.Options) > 0 {
-		m["options"] = json.RawMessage(in.Options)
+		m["options"] = in.Options
 	} else {
-		m["options"] = json.RawMessage(DefaultWidgetOptions(Position{}))
+		m["options"] = DefaultWidgetOptions(Position{})
 	}
 	return json.Marshal(m)
 }
