@@ -17,7 +17,13 @@ Built in Go with `cobra` + `viper`. Outputs pretty tables by default, with `--fo
 
 ## Install
 
-### From source
+### Homebrew (macOS, Linux)
+
+```bash
+brew install leroy/tap/redash
+```
+
+### Go
 
 ```bash
 go install github.com/leroy/redash@latest

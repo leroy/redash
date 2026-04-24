@@ -65,3 +65,25 @@ changelog:
 release:
   draft: false
   prerelease: auto
+
+brews:
+  - name: redash
+    repository:
+      owner: leroy
+      name: homebrew-tap
+      branch: main
+      token: "{{ .Env.HOMEBREW_TAP_GITHUB_TOKEN }}"
+    directory: Formula
+    homepage: "https://github.com/leroy/redash"
+    description: "Command-line client for the Redash REST API (agent-first)"
+    license: "MIT"
+    commit_author:
+      name: goreleaserbot
+      email: bot@goreleaser.com
+    commit_msg_template: "chore: bump {{ .ProjectName }} to {{ .Tag }}"
+    skip_upload: auto
+    install: |
+      bin.install "redash"
+    test: |
+      assert_match "redash #{version}", shell_output("#{bin}/redash version")
+      assert_match "Overview", shell_output("#{bin}/redash manual --list-topics")
