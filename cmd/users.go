@@ -102,7 +102,9 @@ func newUsersGetCmd() *cobra.Command {
 				return err
 			}
 			if f == output.FormatJSON && len(u.Raw) > 0 {
-				cmd.OutOrStdout().Write(append(indentJSON(u.Raw), '\n'))
+				if _, err := cmd.OutOrStdout().Write(append(indentJSON(u.Raw), '\n')); err != nil {
+					return err
+				}
 				return nil
 			}
 			return output.Object(cmd.OutOrStdout(), u, f)

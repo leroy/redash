@@ -107,7 +107,9 @@ func newQueriesGetCmd() *cobra.Command {
 				return err
 			}
 			if f == output.FormatJSON && len(q.Raw) > 0 {
-				cmd.OutOrStdout().Write(append(indentJSON(q.Raw), '\n'))
+				if _, err := cmd.OutOrStdout().Write(append(indentJSON(q.Raw), '\n')); err != nil {
+					return err
+				}
 				return nil
 			}
 			return output.Object(cmd.OutOrStdout(), q, f)

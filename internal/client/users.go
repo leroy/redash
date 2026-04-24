@@ -10,16 +10,16 @@ import (
 
 // User is a Redash user.
 type User struct {
-	ID               int      `json:"id"`
-	Name             string   `json:"name"`
-	Email            string   `json:"email"`
-	Groups           []int    `json:"groups,omitempty"`
-	IsDisabled       bool     `json:"is_disabled,omitempty"`
-	IsInvitationPending bool  `json:"is_invitation_pending,omitempty"`
-	ProfileImageURL  string   `json:"profile_image_url,omitempty"`
-	CreatedAt        string   `json:"created_at,omitempty"`
-	UpdatedAt        string   `json:"updated_at,omitempty"`
-	ActiveAt         string   `json:"active_at,omitempty"`
+	ID                  int    `json:"id"`
+	Name                string `json:"name"`
+	Email               string `json:"email"`
+	Groups              []int  `json:"groups,omitempty"`
+	IsDisabled          bool   `json:"is_disabled,omitempty"`
+	IsInvitationPending bool   `json:"is_invitation_pending,omitempty"`
+	ProfileImageURL     string `json:"profile_image_url,omitempty"`
+	CreatedAt           string `json:"created_at,omitempty"`
+	UpdatedAt           string `json:"updated_at,omitempty"`
+	ActiveAt            string `json:"active_at,omitempty"`
 
 	Raw json.RawMessage `json:"-"`
 }

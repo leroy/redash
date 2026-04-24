@@ -34,9 +34,14 @@ var (
 
 // Root is the top-level command.
 var Root = &cobra.Command{
-	Use:           "redash",
-	Short:         "Command-line client for the Redash API",
-	Long:          "redash is a CLI for the Redash REST API: run queries, manage saved queries, inspect data source schemas, list dashboards, and more.",
+	Use:   "redash",
+	Short: "Command-line client for the Redash API",
+	Long: `redash is a CLI for the Redash REST API: run queries, manage saved queries,
+inspect data source schemas, list dashboards, and more.
+
+Designed to be driven by AI agents as well as humans. Agents: run
+"redash manual" for a comprehensive, version-matched usage guide, or
+"redash manual --format json" for a structured catalog.`,
 	SilenceUsage:  true,
 	SilenceErrors: true,
 }
@@ -55,6 +60,7 @@ func init() {
 	Root.AddCommand(newDashboardsCmd())
 	Root.AddCommand(newUsersCmd())
 	Root.AddCommand(newConfigCmd())
+	Root.AddCommand(newManualCmd())
 	Root.AddCommand(newVersionCmd())
 }
 

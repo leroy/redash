@@ -92,7 +92,9 @@ func newDashboardsGetCmd() *cobra.Command {
 				return err
 			}
 			if f == output.FormatJSON && len(d.Raw) > 0 {
-				cmd.OutOrStdout().Write(append(indentJSON(d.Raw), '\n'))
+				if _, err := cmd.OutOrStdout().Write(append(indentJSON(d.Raw), '\n')); err != nil {
+					return err
+				}
 				return nil
 			}
 			return output.Object(cmd.OutOrStdout(), d, f)

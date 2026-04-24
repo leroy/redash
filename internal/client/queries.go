@@ -12,20 +12,20 @@ import (
 // Query is a Redash saved query. Fields are a subset of the API payload; the
 // full payload is kept in Raw for "get" commands.
 type Query struct {
-	ID           int             `json:"id"`
-	Name         string          `json:"name"`
-	Description  string          `json:"description,omitempty"`
-	Query        string          `json:"query"`
-	DataSourceID int             `json:"data_source_id"`
-	Schedule     json.RawMessage `json:"schedule,omitempty"`
-	Options      json.RawMessage `json:"options,omitempty"`
-	Tags         []string        `json:"tags,omitempty"`
-	IsArchived   bool            `json:"is_archived"`
-	IsDraft      bool            `json:"is_draft"`
-	UpdatedAt    string          `json:"updated_at,omitempty"`
-	CreatedAt    string          `json:"created_at,omitempty"`
-	User         *User           `json:"user,omitempty"`
-	LatestQueryDataID *int       `json:"latest_query_data_id,omitempty"`
+	ID                int             `json:"id"`
+	Name              string          `json:"name"`
+	Description       string          `json:"description,omitempty"`
+	Query             string          `json:"query"`
+	DataSourceID      int             `json:"data_source_id"`
+	Schedule          json.RawMessage `json:"schedule,omitempty"`
+	Options           json.RawMessage `json:"options,omitempty"`
+	Tags              []string        `json:"tags,omitempty"`
+	IsArchived        bool            `json:"is_archived"`
+	IsDraft           bool            `json:"is_draft"`
+	UpdatedAt         string          `json:"updated_at,omitempty"`
+	CreatedAt         string          `json:"created_at,omitempty"`
+	User              *User           `json:"user,omitempty"`
+	LatestQueryDataID *int            `json:"latest_query_data_id,omitempty"`
 
 	Raw json.RawMessage `json:"-"`
 }
@@ -187,8 +187,8 @@ type QueryResult struct {
 
 // QueryResultData is the tabular payload inside a QueryResult.
 type QueryResultData struct {
-	Columns []QueryResultColumn      `json:"columns"`
-	Rows    []map[string]any         `json:"rows"`
+	Columns []QueryResultColumn `json:"columns"`
+	Rows    []map[string]any    `json:"rows"`
 }
 
 // QueryResultColumn describes a single column.

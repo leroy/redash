@@ -153,6 +153,28 @@ redash config use staging
 redash config remove old-profile
 ```
 
+## For AI agents
+
+`redash` is designed to be driven by AI agents as a drop-in replacement for a
+Redash MCP server. The authoritative usage guide is **compiled into the binary**
+and is always version-matched:
+
+```bash
+redash manual                      # full agent-oriented markdown
+redash manual --format json        # structured catalog for machine parsing
+redash manual --topic query        # single section
+redash manual --list-topics        # enumerate available topics
+```
+
+Run `redash manual --format json` once at startup — it's equivalent to an
+MCP server's `list_tools` + `describe_tool` handshake.
+
+A short [`AGENTS.md`](./AGENTS.md) at the repo root is auto-discovered by
+Cursor, Claude Code, and other coding agents; it points to the same command.
+
+Drift is prevented by a unit test: every subcommand must have a manual entry,
+or CI fails.
+
 ## Output formats
 
 - **`table`** (default) — ANSI-styled table with header, good for terminals.
