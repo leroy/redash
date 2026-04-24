@@ -23,6 +23,21 @@ Built in Go with `cobra` + `viper`. Outputs pretty tables by default, with `--fo
 brew install leroy/tap/redash
 ```
 
+### One-line install (macOS, Linux)
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/leroy/redash/main/install.sh | sh
+```
+
+Honours `VERSION` (e.g. `VERSION=v1.0.0`) and `INSTALL_DIR` (default `/usr/local/bin`; uses `sudo` if needed):
+
+```bash
+curl -sSfL https://raw.githubusercontent.com/leroy/redash/main/install.sh \
+  | VERSION=v1.1.0 INSTALL_DIR=$HOME/.local/bin sh
+```
+
+The script detects OS/arch, verifies the SHA-256 against `checksums.txt`, and refuses to install on mismatch.
+
 ### Go
 
 ```bash
